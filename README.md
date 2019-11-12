@@ -75,5 +75,5 @@ Starting the express server to send requests to on `localhost:3000`
 ### Dependencies
 
 - [Express](https://www.npmjs.com/package/express)
-- [Joi](https://www.npmjs.com/package/joi)
+- [Joi](https://www.npmjs.com/package/@hapi/joi)
 - [Express Joi](https://www.npmjs.com/package/express-joi-validation)
