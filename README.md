@@ -51,3 +51,23 @@ guessedLetters
 'Game over, you won!'
 'Game over, you lost sorry!'
 'Run start to reset the game!'
+
+## Installation
+
+Install node modules
+
+- [npm](www.npmjs.com) `npm install`
+- [yarn](https://yarnpkg.com/) `yarn install`
+
+## Start
+
+Starting the express server to send requests to on `localhost:3000`
+
+`node app.js`
+
+## Usage
+
+### Routes
+
+- locahost:3000/ (GET)
+  This returns Hello World!
