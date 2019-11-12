@@ -71,3 +71,9 @@ Starting the express server to send requests to on `localhost:3000`
 
 - locahost:3000/ (GET)
   This returns Hello World!
+
+### Dependencies
+
+- [Express](https://www.npmjs.com/package/express)
+- [Joi](https://www.npmjs.com/package/joi)
+- [Express Joi](https://www.npmjs.com/package/express-joi-validation)

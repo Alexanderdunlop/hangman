@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "main": "app.js",
   "dependencies": {
-    "express": "^4.17.1"
+    "@hapi/joi": "^16.1.7",
+    "express": "^4.17.1",
+    "express-joi-validation": "^4.0.1",
+    "joi": "^14.3.1"
   }
 }
