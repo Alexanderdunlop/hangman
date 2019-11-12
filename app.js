@@ -5,7 +5,7 @@ const https = require("https");
 const Joi = require("joi");
 const validator = require("express-joi-validation").createValidator({});
 
-const port = 3000;
+// Create Game fs JSON function.
 
 const createGame = (res, jsonObject) => {
   const parsedWords = JSON.parse(jsonObject).words;
@@ -14,8 +14,9 @@ const createGame = (res, jsonObject) => {
 
   let json = JSON.stringify({
     wordToGuess,
-    lives: 3,
-    guessedLetters: []
+    lives: 10,
+    guessedLetters: [],
+    wordGuessed: false
   });
 
   fs.writeFile("data.json", json, "utf8", (err, data) => {
@@ -26,6 +27,8 @@ const createGame = (res, jsonObject) => {
     }
   });
 };
+
+// Fetch words api call & saves to JSON function.
 
 const fetchWords = res => {
   https
@@ -60,6 +63,8 @@ const fetchWords = res => {
     });
 };
 
+// Start Game Route.
+
 app.get("/start", (req, res) => {
   fs.readFile("words.json", (err, data) => {
     if (err) {
@@ -78,6 +83,8 @@ app.get("/start", (req, res) => {
   });
 });
 
+// Guess Letter Joi Params.
+
 const querySchema = Joi.object({
   letter: Joi.string()
     .regex(/^[a-zA-Z]/)
@@ -86,44 +93,85 @@ const querySchema = Joi.object({
     .required()
 });
 
+// Guess Letter Route.
+
 app.get("/guess/:letter", validator.params(querySchema), (req, res) => {
-  const wordToGuess = "aahing";
-  let guessedLetters = ["a", "b"];
-  let lives = 3;
-  let lettersToGuess = wordToGuess.split("");
+  fs.readFile("data.json", (err, data) => {
+    // Check if game has been created.
+    if (err) {
+      if (
+        err.message === "ENOENT: no such file or directory, open 'data.json'"
+      ) {
+        res.send("Please create a game!");
+      } else {
+        console.error(err);
+        res.send("Sorry an error occured!");
+      }
+      // Guess letter.
+    } else {
+      let gameData = JSON.parse(data);
+      let message = "";
+      let lettersRemaining = 0;
 
-  guessedLetters.map(x => {
-    lettersToGuess = lettersToGuess.filter(l => l !== x);
-  });
+      // Check game is still running.
+      if (gameData.lives.length !== 0 || gameData.wordGuessed === false) {
+        if (
+          gameData.guessedLetters.findIndex(x => x === req.params.letter) > -1
+        ) {
+          message = `You have already guessed "${req.params.letter}"`;
+        } else {
+          let lettersToGuess = gameData.wordToGuess.split("");
 
-  let message = "";
-  if (guessedLetters.findIndex(x => x === req.params.letter) > -1) {
-    message = `You have already guessed "${req.params.letter}"`;
-  } else {
-    message = `You successfully guessed "${req.params.letter}"`;
-    guessedLetters.push(req.params.letter);
+          gameData.guessedLetters.map(x => {
+            lettersToGuess = lettersToGuess.filter(l => l !== x);
+          });
 
-    const preLetterCount = lettersToGuess.length;
+          const preLetterCount = lettersToGuess.length;
+          lettersToGuess = lettersToGuess.filter(x => x !== req.params.letter);
 
-    lettersToGuess = lettersToGuess.filter(x => x !== req.params.letter);
+          if (preLetterCount === lettersToGuess.length) {
+            message = `Ouch you guessed "${req.params.letter}" but took 1 life`;
+            gameData.lives -= 1;
+          } else if (lettersToGuess.length === 0) {
+            gameData.wordGuessed = true;
+          } else {
+            message = `You guessed correct with "${req.params.letter}"!`;
+          }
 
-    if (preLetterCount === lettersToGuess.length) {
-      lives -= 1;
+          lettersRemaining = lettersToGuess.length;
+          gameData.guessedLetters.push(req.params.letter);
+
+          // Save guess.
+          fs.writeFile(
+            "data.json",
+            JSON.stringify(gameData),
+            "utf8",
+            (err, data) => {
+              if (err) {
+                res.send("Sorry an error occured saving game data");
+              }
+            }
+          );
+        }
+      }
+
+      if (gameData.lives.length === 0) {
+        message = `Unluckly you couldn't guess the word "${gameData.wordToGuess}"! Run /start to play again`;
+      } else if (gameData.wordGuessed === true) {
+        message = `Congrats you won with ${gameData.lives} lives left! The word you guessed was "${gameData.wordToGuess}"! Run /start to play again`;
+      }
+
+      res.send({
+        message,
+        result: {
+          wordLength: gameData.wordToGuess.length,
+          lettersRemaining,
+          guessedLetters: gameData.guessedLetters,
+          lives: gameData.lives
+        }
+      });
     }
-  }
-
-  res.send({
-    message: message,
-    result: {
-      wordLength: wordToGuess.length,
-      lettersRemaining: lettersToGuess.length,
-      guessedLetters,
-      lives
-    }
   });
-
-  // Message: Congrats you won with x lives left! The word you guessed was ` `! Run /start to play again
-  // Message: Unluckly you couldn't guess the word ` `! Run /start to play again
 });
 
-app.listen(port, () => console.log(`Hangman app listening on port ${port}!`));
+app.listen(3000, () => console.log(`Hangman app listening on port 3000!`));
