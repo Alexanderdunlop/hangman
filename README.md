@@ -67,6 +67,13 @@ Starting the express server to send requests to on `localhost:3000`
 
 ## Usage
 
+- Starting/Restarting the game
+  `curl -X GET "http://localhost:3000/start"`
+- Guessing
+  `curl -X GET "http://localhost:3000/guess/:letter"`
+  Example:
+  `curl -X GET "http://localhost:3000/guess/a"`
+
 ### Routes
 
 - locahost:3000/ (GET)
