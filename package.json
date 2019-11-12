@@ -2,5 +2,8 @@
   "name": "hangman",
   "private": true,
   "version": "1.0.0",
-  "main": "index.js"
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
