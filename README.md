@@ -74,11 +74,6 @@ Starting the express server to send requests to on `localhost:3000`
   Example:
   `curl -X GET "http://localhost:3000/guess/a"`
 
-### Routes
-
-- locahost:3000/ (GET)
-  This returns Hello World!
-
 ### Dependencies
 
 - [Express](https://www.npmjs.com/package/express)
