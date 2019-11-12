@@ -7,8 +7,24 @@ const validator = require("express-joi-validation").createValidator({});
 
 const port = 3000;
 
-const createGame = res => {
-  res.send("Create game here!");
+const createGame = (res, jsonObject) => {
+  const parsedWords = JSON.parse(jsonObject).words;
+  const wordToGuess =
+    parsedWords[Math.floor(Math.random() * parsedWords.length)];
+
+  let json = JSON.stringify({
+    wordToGuess,
+    lives: 3,
+    guessedLetters: []
+  });
+
+  fs.writeFile("data.json", json, "utf8", (err, data) => {
+    if (err) {
+      res.send("Sorry an error occured saving game data");
+    } else {
+      res.send("Game created!");
+    }
+  });
 };
 
 const fetchWords = res => {
@@ -32,7 +48,7 @@ const fetchWords = res => {
             if (err) {
               res.send("Sorry an error occured saving words");
             } else {
-              createGame(res);
+              createGame(res, json);
             }
           });
         });
@@ -57,7 +73,7 @@ app.get("/start", (req, res) => {
         res.send("Sorry an error occured!");
       }
     } else {
-      createGame(res);
+      createGame(res, data);
     }
   });
 });
@@ -105,6 +121,9 @@ app.get("/guess/:letter", validator.params(querySchema), (req, res) => {
       lives
     }
   });
+
+  // Message: Congrats you won with x lives left! The word you guessed was ` `! Run /start to play again
+  // Message: Unluckly you couldn't guess the word ` `! Run /start to play again
 });
 
 app.listen(port, () => console.log(`Hangman app listening on port ${port}!`));
